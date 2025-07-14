@@ -7,14 +7,29 @@ header("Access-Control-Allow-Origin: *");
 // This tells the browser that the response is in JSON format.
 header("Content-Type: application/json; charset=UTF-8");
 
-// We're creating the same array of products, using PHP syntax.
-$products = [
-  ['id' => 1, 'name' => 'PHP-Powered T-Shirt', 'price' => 17.99, 'stock' => 150],
-  ['id' => 2, 'name' => 'PHP-Powered Jeans', 'price' => 54.99, 'stock' => 100],
-  ['id' => 3, 'name' => 'PHP-Powered Sneakers', 'price' => 99.99, 'stock' => 75]
-];
+//Database connection
+$db_host = '127.0.0.1';
+$db_name = 'my_ecommerce';
+$db_username = 'shoes_user';
+$db_password = 'kachan786';
 
-// `json_encode` is the PHP equivalent of `JSON.stringify`.
-// `echo` prints the output.
-echo json_encode($products);
+try {
+  $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_username, $db_password);
+
+  $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+  $stmt = $pdo -> prepare("SELECT id, name, price, stock FROM products");
+
+  $stmt -> execute();
+
+  $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  // `json_encode` is the PHP equivalent of `JSON.stringify`.
+  // `echo` prints the output.
+  echo json_encode($products);
+} catch(PDOException $e) {
+  http_response_code(500);
+  echo json_encode(['error' => 'Database Error:', $e->getMessage()]);
+}
+
 ?>
