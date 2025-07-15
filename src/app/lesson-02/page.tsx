@@ -5,9 +5,40 @@ import React, { useEffect, useState } from 'react'
 
 export default function page() {
     const [product, setProduct] = useState(null);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<unknown>(null);
+
+    const [name, setName] = useState('');
+    const [title, setTitle] = useState('');
+
+    async function handleSubmit(e) {
+        e.preventDefault()
+        try{
+            const response = await fetch('http://localhost:8000/api/user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }, 
+                body: JSON.stringify({
+                    name: name,
+                    title: title
+                })
+            });
+            const result = await response.json();
+            if(!response.ok) {
+                throw new Error(result.error);
+            }
+
+            alert(result.message);
+
+            setName('');
+            setTitle('');
+
+        } catch(error) {
+            alert("Error Creating Product" + error.message);
+        }
+    }
 
     useEffect(() => {
         async function getProduct() {
@@ -47,6 +78,14 @@ export default function page() {
             </li>
             ))}
         </ul>
+
+        <form onSubmit={handleSubmit}>
+            <label>Name:</label>
+            <input type="text" placeholder='Enter Name' value={name} onChange={(e) => setName(e.target.value)} />
+            <label>Title:</label>
+            <input type="text" placeholder='Enter Title' value={title} onChange={(e) => setTitle(e.target.value)} />
+            <button type='submit' className='px-4 py-2 bg-orange-500 text-white'>Add User</button>
+        </form>
     </div>
   )
 }
