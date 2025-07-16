@@ -50,6 +50,24 @@ try {
         // 4. Send a success response
         http_response_code(201); // Created
         echo json_encode(['message' => 'Product created successfully.']);
+    } 
+    elseif($method == 'PUT')
+    {
+        $data = json_decode(file_get_contents('php://input'));
+        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        
+        if(!$id)
+        {
+            http_response_code(400);
+            echo json_encode(['error' => 'Product ID not specified']);
+            exit;
+        }
+
+        $sql = $pdo->prepare("UPDATE products SET name = ?, price = ?, stocks = ? WHERE id = ?");
+        $sql->execute([$data->name, $data->price, $data->stock, $id]);
+
+        http_response_code(200);
+        echo json_encode(['message' => 'Product updated successfully.']);
     }
 
 } catch(PDOException $e) {

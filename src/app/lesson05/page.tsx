@@ -2,6 +2,41 @@
 
 import { useState, useEffect } from 'react';
 
+function EditProductForm({ product, onSave, onCancel}) {
+    const [name, setName] = useState(product.name);
+    const [price, setPrice] = useState(product.price);
+    const [stock, setStock] = useState(product.stock);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ ...product, name, price: parseFloat(price), stock: parseInt(stock)})
+    };
+    return (
+        <div>
+            <h4>Editing: {product.name}</h4>
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label>Product Name: </label>
+                    <input type='text' value={name} onChange={e => setName(e.target.value)} />
+                </div>
+                <div>
+                    <label>Price: </label>
+                    <input type='number' value={price} onChange={e => setPrice(e.target.value)} />
+                </div>
+                <div>
+                    <label>Stock: </label>
+                    <input type='number' value={stock} onChange={e => setStock(e.target.value)} />
+                </div>
+                <button type='submit' >Save Changes</button>
+                <button type='button' onClick={onCancel}>Cancel</button>
+            </form>
+        </div>
+    )
+}
+
+
+
+
 export default function LessonTwoPage() {
     // ... (existing state for products, user, loading, error) ...
     const [products, setProducts] = useState([]);
