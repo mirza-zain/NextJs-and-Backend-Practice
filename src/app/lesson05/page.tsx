@@ -43,6 +43,7 @@ export default function LessonTwoPage() {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [editingProduct, setEditingProduct] = useState(null);
 
     // --- NEW: State for our form inputs ---
     const [name, setName] = useState('');
@@ -86,28 +87,49 @@ export default function LessonTwoPage() {
         alert('Error creating product: ' + err.message);
     }
 };
+async function getProduct() {
+    try {
+        const [prodRes, userRes] = await Promise.all([fetch("http://localhost:8000/api/product.php"), fetch("http://localhost:8000/api/user.php")]);
+        const prodData = await prodRes.json();
+        const userData = await userRes.json();
+
+        setProducts(prodData);
+        setUser(userData);
+    }
+    catch(error) {
+        console.error('There is error: ', error);
+        setError(error);
+    }
+    finally {
+        setIsLoading(false);
+    }
+}
+
     useEffect(() => {
-            async function getProduct() {
-                try {
-                    const [prodRes, userRes] = await Promise.all([fetch("http://localhost:8000/api/product.php"), fetch("http://localhost:8000/api/user.php")]);
-                    const prodData = await prodRes.json();
-                    const userData = await userRes.json();
-    
-                    setProducts(prodData);
-                    setUser(userData);
-                }
-                catch(error) {
-                    console.error('There is error: ', error);
-                    setError(error);
-                }
-                finally {
-                    setIsLoading(false);
-                }
-            }
-    
-            getProduct();
-    
+            getProduct();    
         }, []);
+
+    const handleUpdateProduct = async (updatedProduct) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/product.php?id=${updatedProduct.id}`, {
+               method: 'PUT',
+               headers: { 'Content-Type': 'application/json'},
+               body: JSON.stringify(updatedProduct) 
+            });
+
+            if(!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.error || 'Failed to update product');
+            }
+
+            setEditingProduct(null);
+            await getProduct();
+
+        } catch(err) {
+            alert('Error updating product: ' + err.message)
+        }
+
+    }
     
         if (isLoading) return <p>Loading....</p>;
         if (error) return <p>Error: {String(error)}</p>;
@@ -116,7 +138,23 @@ export default function LessonTwoPage() {
     return (
         <div className='p-4'>
             {/* ... (Your existing Welcome and Products List JSX) ... */}
-            
+            <h2>Our Products</h2>
+        <p>This data is coming from our very own modern API route!</p>
+        <ul>
+            {products.map((product) => (
+            <li key={product.id}>
+                <strong>{product.name}</strong> - ${product.price} (Stock: {product.stock})
+                <button onClick={() => setEditingProduct(product)}>Edit</button>
+            </li>
+            ))}
+        </ul>
+        {editingProduct && (
+                <EditProductForm 
+                    product={editingProduct} 
+                    onSave={handleUpdateProduct} 
+                    onCancel={() => setEditingProduct(null)} 
+                />
+            )}
             <hr style={{margin: '2rem 0'}} />
 
             {/* --- NEW: The "Add Product" Form --- */}

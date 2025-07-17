@@ -2,7 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 // NEW: Allow POST method
-header("Access-Control-Allow-Methods: POST, GET");
+header("Access-Control-Allow-Methods: POST, GET, PUT");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 
@@ -63,7 +63,7 @@ try {
             exit;
         }
 
-        $sql = $pdo->prepare("UPDATE products SET name = ?, price = ?, stocks = ? WHERE id = ?");
+        $sql = $pdo->prepare("UPDATE products SET name = ?, price = ?, stock = ? WHERE id = ?");
         $sql->execute([$data->name, $data->price, $data->stock, $id]);
 
         http_response_code(200);
